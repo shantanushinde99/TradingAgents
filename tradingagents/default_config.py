@@ -8,26 +8,34 @@ DEFAULT_CONFIG = {
         os.path.abspath(os.path.join(os.path.dirname(__file__), ".")),
         "dataflows/data_cache",
     ),
-    # LLM settings
-    "llm_provider": "openai",
-    "deep_think_llm": "o4-mini",
-    "quick_think_llm": "gpt-4o-mini",
-    "backend_url": "https://api.openai.com/v1",
+    # LLM settings - Default to OpenRouter instead of OpenAI
+    "llm_provider": "openrouter",
+    "deep_think_llm": "deepseek/deepseek-chat-v3-0324:free",
+    "quick_think_llm": "meta-llama/llama-3.3-8b-instruct:free",
+    "backend_url": "https://openrouter.ai/api/v1",
     # Debate and discussion settings
     "max_debate_rounds": 1,
     "max_risk_discuss_rounds": 1,
     "max_recur_limit": 100,
     # Data vendor configuration
     # Category-level configuration (default for all tools in category)
+    # Using Alpha Vantage as primary with Yahoo Finance as fallback
     "data_vendors": {
-        "core_stock_apis": "yfinance",       # Options: yfinance, alpha_vantage, local
-        "technical_indicators": "yfinance",  # Options: yfinance, alpha_vantage, local
-        "fundamental_data": "alpha_vantage", # Options: openai, alpha_vantage, local
-        "news_data": "alpha_vantage",        # Options: openai, alpha_vantage, google, local
+        "core_stock_apis": "alpha_vantage, yfinance",       # Primary: Alpha Vantage, Fallback: Yahoo Finance
+        "technical_indicators": "alpha_vantage, yfinance",  # Primary: Alpha Vantage, Fallback: Yahoo Finance
+        "fundamental_data": "alpha_vantage, yfinance",      # Primary: Alpha Vantage, Fallback: Yahoo Finance
+        "news_data": "alpha_vantage, yfinance",             # Primary: Alpha Vantage, Fallback: Yahoo Finance
     },
     # Tool-level configuration (takes precedence over category-level)
     "tool_vendors": {
-        # Example: "get_stock_data": "alpha_vantage",  # Override category default
-        # Example: "get_news": "openai",               # Override category default
+        # Specific tool overrides - all use Alpha Vantage with Yahoo Finance fallback
+        "get_stock_data": "alpha_vantage, yfinance",
+        "get_indicators": "alpha_vantage, yfinance",
+        "get_fundamentals": "alpha_vantage, yfinance",
+        "get_balance_sheet": "alpha_vantage, yfinance",
+        "get_cashflow": "alpha_vantage, yfinance",
+        "get_income_statement": "alpha_vantage, yfinance",
+        "get_news": "alpha_vantage, yfinance",
+        "get_insider_transactions": "alpha_vantage, yfinance",
     },
 }

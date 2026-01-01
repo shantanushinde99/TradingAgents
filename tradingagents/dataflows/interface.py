@@ -1,8 +1,8 @@
 from typing import Annotated
 
 # Import from vendor-specific modules
-from .local import get_YFin_data, get_finnhub_news, get_finnhub_company_insider_sentiment, get_finnhub_company_insider_transactions, get_simfin_balance_sheet, get_simfin_cashflow, get_simfin_income_statements, get_reddit_global_news, get_reddit_company_news
-from .y_finance import get_YFin_data_online, get_stock_stats_indicators_window, get_balance_sheet as get_yfinance_balance_sheet, get_cashflow as get_yfinance_cashflow, get_income_statement as get_yfinance_income_statement, get_insider_transactions as get_yfinance_insider_transactions
+from .local import get_YFin_data, get_simfin_balance_sheet, get_simfin_cashflow, get_simfin_income_statements, get_reddit_global_news, get_reddit_company_news
+from .y_finance import get_YFin_data_online, get_stock_stats_indicators_window, get_balance_sheet as get_yfinance_balance_sheet, get_cashflow as get_yfinance_cashflow, get_income_statement as get_yfinance_income_statement, get_insider_transactions as get_yfinance_insider_transactions, get_news as get_yfinance_news, get_fundamentals as get_yfinance_fundamentals
 from .google import get_google_news
 from .openai import get_stock_news_openai, get_global_news_openai, get_fundamentals_openai
 from .alpha_vantage import (
@@ -13,7 +13,9 @@ from .alpha_vantage import (
     get_cashflow as get_alpha_vantage_cashflow,
     get_income_statement as get_alpha_vantage_income_statement,
     get_insider_transactions as get_alpha_vantage_insider_transactions,
-    get_news as get_alpha_vantage_news
+    get_news as get_alpha_vantage_news,
+    get_global_news as get_alpha_vantage_global_news,
+    get_insider_sentiment as get_alpha_vantage_insider_sentiment
 )
 from .alpha_vantage_common import AlphaVantageRateLimitError
 
@@ -77,42 +79,44 @@ VENDOR_METHODS = {
     },
     # fundamental_data
     "get_fundamentals": {
+        "yfinance": get_yfinance_fundamentals,
         "alpha_vantage": get_alpha_vantage_fundamentals,
         "openai": get_fundamentals_openai,
     },
     "get_balance_sheet": {
-        "alpha_vantage": get_alpha_vantage_balance_sheet,
         "yfinance": get_yfinance_balance_sheet,
+        "alpha_vantage": get_alpha_vantage_balance_sheet,
         "local": get_simfin_balance_sheet,
     },
     "get_cashflow": {
-        "alpha_vantage": get_alpha_vantage_cashflow,
         "yfinance": get_yfinance_cashflow,
+        "alpha_vantage": get_alpha_vantage_cashflow,
         "local": get_simfin_cashflow,
     },
     "get_income_statement": {
-        "alpha_vantage": get_alpha_vantage_income_statement,
         "yfinance": get_yfinance_income_statement,
+        "alpha_vantage": get_alpha_vantage_income_statement,
         "local": get_simfin_income_statements,
     },
     # news_data
     "get_news": {
         "alpha_vantage": get_alpha_vantage_news,
+        "yfinance": get_yfinance_news,
         "openai": get_stock_news_openai,
         "google": get_google_news,
-        "local": [get_finnhub_news, get_reddit_company_news, get_google_news],
+        "local": [get_reddit_company_news, get_google_news],
     },
     "get_global_news": {
+        "alpha_vantage": get_alpha_vantage_global_news,
         "openai": get_global_news_openai,
         "local": get_reddit_global_news
     },
     "get_insider_sentiment": {
-        "local": get_finnhub_company_insider_sentiment
+        "alpha_vantage": get_alpha_vantage_insider_sentiment,
     },
     "get_insider_transactions": {
         "alpha_vantage": get_alpha_vantage_insider_transactions,
         "yfinance": get_yfinance_insider_transactions,
-        "local": get_finnhub_company_insider_transactions,
     },
 }
 

@@ -149,6 +149,12 @@ def select_shallow_thinking_agent(provider) -> str:
             ("Meta: Llama 3.3 8B Instruct - A lightweight and ultra-fast variant of Llama 3.3 70B", "meta-llama/llama-3.3-8b-instruct:free"),
             ("google/gemini-2.0-flash-exp:free - Gemini Flash 2.0 offers a significantly faster time to first token", "google/gemini-2.0-flash-exp:free"),
         ],
+        "groq": [
+            ("Llama 3.1 8B Instant - Fast inference with Llama 3.1 8B", "llama-3.1-8b-instant"),
+            ("Llama 3.3 70B Versatile - Powerful and versatile Llama model", "llama-3.3-70b-versatile"),
+            ("Llama 4 Maverick 17B - Latest Llama 4 model with 128k context", "meta-llama/llama-4-maverick-17b-128e-instruct"),
+            ("Llama 4 Scout 17B - Efficient Llama 4 model", "meta-llama/llama-4-scout-17b-16e-instruct"),
+        ],
         "ollama": [
             ("llama3.1 local", "llama3.1"),
             ("llama3.2 local", "llama3.2"),
@@ -211,6 +217,12 @@ def select_deep_thinking_agent(provider) -> str:
             ("DeepSeek V3 - a 685B-parameter, mixture-of-experts model", "deepseek/deepseek-chat-v3-0324:free"),
             ("Deepseek - latest iteration of the flagship chat model family from the DeepSeek team.", "deepseek/deepseek-chat-v3-0324:free"),
         ],
+        "groq": [
+            ("Llama 3.3 70B Versatile - Powerful and versatile Llama model", "llama-3.3-70b-versatile"),
+            ("Llama 4 Maverick 17B - Latest Llama 4 model with 128k context", "meta-llama/llama-4-maverick-17b-128e-instruct"),
+            ("Llama 4 Scout 17B - Efficient Llama 4 model", "meta-llama/llama-4-scout-17b-16e-instruct"),
+            ("Llama Guard 4 12B - Advanced safety model", "meta-llama/llama-guard-4-12b"),
+        ],
         "ollama": [
             ("llama3.1 local", "llama3.1"),
             ("qwen3", "qwen3"),
@@ -243,11 +255,9 @@ def select_llm_provider() -> tuple[str, str]:
     """Select the OpenAI api url using interactive selection."""
     # Define OpenAI api options with their corresponding endpoints
     BASE_URLS = [
-        ("OpenAI", "https://api.openai.com/v1"),
-        ("Anthropic", "https://api.anthropic.com/"),
         ("Google", "https://generativelanguage.googleapis.com/v1"),
         ("Openrouter", "https://openrouter.ai/api/v1"),
-        ("Ollama", "http://localhost:11434/v1"),        
+        ("Groq", "https://api.groq.com/openai/v1"),
     ]
     
     choice = questionary.select(

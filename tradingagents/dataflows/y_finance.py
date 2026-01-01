@@ -405,3 +405,140 @@ def get_insider_transactions(
         
     except Exception as e:
         return f"Error retrieving insider transactions for {ticker}: {str(e)}"
+
+
+def get_news(
+    ticker: Annotated[str, "ticker symbol of the company"],
+    start_date: Annotated[str, "Start date in yyyy-mm-dd format"],
+    end_date: Annotated[str, "End date in yyyy-mm-dd format"]
+):
+    """Get news data for a ticker from yfinance."""
+    try:
+        ticker_obj = yf.Ticker(ticker.upper())
+        news = ticker_obj.news
+        
+        if not news:
+            return f"No news found for symbol '{ticker}' between {start_date} and {end_date}"
+        
+        # Parse dates for filtering
+        start_dt = datetime.strptime(start_date, "%Y-%m-%d")
+        end_dt = datetime.strptime(end_date, "%Y-%m-%d")
+        
+        # Filter news by date range
+        filtered_news = []
+        for article in news:
+            # Get article timestamp
+            article_time = article.get('providerPublishTime', 0)
+            article_dt = datetime.fromtimestamp(article_time)
+            
+            if start_dt <= article_dt <= end_dt:
+                filtered_news.append(article)
+        
+        if not filtered_news:
+            return f"No news found for symbol '{ticker}' between {start_date} and {end_date}"
+        
+        # Format news as readable text with sources
+        result = f"# News for {ticker.upper()} from {start_date} to {end_date}\n"
+        result += f"# Total articles: {len(filtered_news)}\n"
+        result += f"# Data retrieved on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+        
+        for idx, article in enumerate(filtered_news, 1):
+            title = article.get('title', 'No title')
+            publisher = article.get('publisher', 'Unknown')
+            link = article.get('link', '')
+            publish_time = datetime.fromtimestamp(article.get('providerPublishTime', 0))
+            
+            result += f"## Article {idx}\n"
+            result += f"**Title:** {title}\n"
+            result += f"**Publisher:** {publisher}\n"
+            result += f"**Published:** {publish_time.strftime('%Y-%m-%d %H:%M:%S')}\n"
+            result += f"**Source:** {link}\n"
+            
+            # Add thumbnail if available
+            if 'thumbnail' in article and article['thumbnail']:
+                result += f"**Image:** {article['thumbnail'].get('resolutions', [{}])[0].get('url', '')}\n"
+            
+            result += "\n"
+        
+        return result
+        
+    except Exception as e:
+        return f"Error retrieving news for {ticker}: {str(e)}"
+
+
+def get_fundamentals(
+    ticker: Annotated[str, "ticker symbol of the company"],
+    curr_date: Annotated[str, "current date (not used for yfinance)"] = None
+):
+    """Get fundamental data for a ticker from yfinance."""
+    try:
+        ticker_obj = yf.Ticker(ticker.upper())
+        info = ticker_obj.info
+        
+        if not info:
+            return f"No fundamental data found for symbol '{ticker}'"
+        
+        # Format key fundamental metrics
+        result = f"# Fundamental Data for {ticker.upper()}\n"
+        result += f"# Data retrieved on: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n\n"
+        
+        # Company Overview
+        result += "## Company Overview\n"
+        result += f"**Name:** {info.get('longName', 'N/A')}\n"
+        result += f"**Sector:** {info.get('sector', 'N/A')}\n"
+        result += f"**Industry:** {info.get('industry', 'N/A')}\n"
+        result += f"**Country:** {info.get('country', 'N/A')}\n"
+        result += f"**Website:** {info.get('website', 'N/A')}\n"
+        result += f"**Description:** {info.get('longBusinessSummary', 'N/A')}\n\n"
+        
+        # Valuation Metrics
+        result += "## Valuation Metrics\n"
+        result += f"**Market Cap:** ${info.get('marketCap', 0):,.0f}\n"
+        result += f"**Enterprise Value:** ${info.get('enterpriseValue', 0):,.0f}\n"
+        result += f"**P/E Ratio (Trailing):** {info.get('trailingPE', 'N/A')}\n"
+        result += f"**P/E Ratio (Forward):** {info.get('forwardPE', 'N/A')}\n"
+        result += f"**PEG Ratio:** {info.get('pegRatio', 'N/A')}\n"
+        result += f"**Price to Book:** {info.get('priceToBook', 'N/A')}\n"
+        result += f"**Price to Sales:** {info.get('priceToSalesTrailing12Months', 'N/A')}\n\n"
+        
+        # Profitability Metrics
+        result += "## Profitability Metrics\n"
+        result += f"**Profit Margin:** {info.get('profitMargins', 0) * 100:.2f}%\n"
+        result += f"**Operating Margin:** {info.get('operatingMargins', 0) * 100:.2f}%\n"
+        result += f"**Return on Assets (ROA):** {info.get('returnOnAssets', 0) * 100:.2f}%\n"
+        result += f"**Return on Equity (ROE):** {info.get('returnOnEquity', 0) * 100:.2f}%\n\n"
+        
+        # Financial Health
+        result += "## Financial Health\n"
+        result += f"**Total Cash:** ${info.get('totalCash', 0):,.0f}\n"
+        result += f"**Total Debt:** ${info.get('totalDebt', 0):,.0f}\n"
+        result += f"**Debt to Equity:** {info.get('debtToEquity', 'N/A')}\n"
+        result += f"**Current Ratio:** {info.get('currentRatio', 'N/A')}\n"
+        result += f"**Quick Ratio:** {info.get('quickRatio', 'N/A')}\n\n"
+        
+        # Growth & Revenue
+        result += "## Growth & Revenue\n"
+        result += f"**Revenue:** ${info.get('totalRevenue', 0):,.0f}\n"
+        result += f"**Revenue Growth:** {info.get('revenueGrowth', 0) * 100:.2f}%\n"
+        result += f"**Earnings Growth:** {info.get('earningsGrowth', 0) * 100:.2f}%\n"
+        result += f"**Revenue Per Share:** ${info.get('revenuePerShare', 0):.2f}\n\n"
+        
+        # Dividend Information
+        result += "## Dividend Information\n"
+        result += f"**Dividend Rate:** ${info.get('dividendRate', 0):.2f}\n"
+        result += f"**Dividend Yield:** {info.get('dividendYield', 0) * 100:.2f}%\n"
+        result += f"**Payout Ratio:** {info.get('payoutRatio', 0) * 100:.2f}%\n"
+        result += f"**Ex-Dividend Date:** {info.get('exDividendDate', 'N/A')}\n\n"
+        
+        # Analyst Recommendations
+        result += "## Analyst Information\n"
+        result += f"**Target Price:** ${info.get('targetMeanPrice', 0):.2f}\n"
+        result += f"**Target High:** ${info.get('targetHighPrice', 0):.2f}\n"
+        result += f"**Target Low:** ${info.get('targetLowPrice', 0):.2f}\n"
+        result += f"**Recommendation:** {info.get('recommendationKey', 'N/A').upper()}\n"
+        result += f"**Number of Analyst Opinions:** {info.get('numberOfAnalystOpinions', 0)}\n\n"
+        
+        return result
+        
+    except Exception as e:
+        return f"Error retrieving fundamentals for {ticker}: {str(e)}"

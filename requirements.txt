@@ -13,7 +13,6 @@ setuptools
 backtrader
 akshare
 tushare
-finnhub-python
 parsel
 requests
 tqdm
@@ -24,3 +23,4 @@ rich
 questionary
 langchain_anthropic
 langchain-google-genai
+langchain-groq
