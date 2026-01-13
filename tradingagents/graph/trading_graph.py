@@ -5,6 +5,7 @@ from pathlib import Path
 import json
 from datetime import date
 from typing import Dict, Any, Tuple, List, Optional
+import time
 
 from langchain_openai import ChatOpenAI
 from langchain_anthropic import ChatAnthropic
@@ -43,6 +44,18 @@ from .propagation import Propagator
 from .reflection import Reflector
 from .signal_processing import SignalProcessor
 
+# Import backend logger
+try:
+    import sys
+    utils_path = Path(__file__).parent.parent.parent.parent / "utils"
+    if str(utils_path) not in sys.path:
+        sys.path.insert(0, str(utils_path))
+    from backend_logger import backend_logger
+    LOGGER_AVAILABLE = True
+except ImportError:
+    LOGGER_AVAILABLE = False
+    backend_logger = None
+
 
 class TradingAgentsGraph:
     """Main class that orchestrates the trading agents framework."""
@@ -62,6 +75,14 @@ class TradingAgentsGraph:
         """
         self.debug = debug
         self.config = config or DEFAULT_CONFIG
+
+        # Log initialization
+        if LOGGER_AVAILABLE and backend_logger:
+            backend_logger.log_agent_init("TradingAgentsGraph", {
+                "selected_analysts": selected_analysts,
+                "debug": debug,
+                "llm_provider": self.config.get("llm_provider")
+            })
 
         # Update the interface's config
         set_config(self.config)
@@ -165,6 +186,15 @@ class TradingAgentsGraph:
         """Run the trading agents graph for a company on a specific date."""
 
         self.ticker = company_name
+        
+        # Log propagation start
+        if LOGGER_AVAILABLE and backend_logger:
+            backend_logger.log_agent_action("TradingAgentsGraph", "Starting Analysis", {
+                "ticker": company_name,
+                "date": str(trade_date)
+            })
+        
+        start_time = time.time()
 
         # Initialize state
         init_agent_state = self.propagator.create_initial_state(
@@ -189,6 +219,14 @@ class TradingAgentsGraph:
 
         # Store current state for reflection
         self.curr_state = final_state
+        
+        # Log performance
+        duration = time.time() - start_time
+        if LOGGER_AVAILABLE and backend_logger:
+            backend_logger.log_performance("Analysis Complete", duration, {
+                "ticker": company_name,
+                "decision": final_state.get("final_trade_decision")
+            })
 
         # Log state
         self._log_state(trade_date, final_state)
